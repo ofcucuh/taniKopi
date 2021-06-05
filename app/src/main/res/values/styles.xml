@@ -1,0 +1,26 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="android:Theme.Material.Light.DarkActionBar">
+        <!-- Customize your theme here. -->
+    </style>
+    <style name="ToolbarTheme" parent="@style/Theme.AppCompat.Light.DarkActionBar">
+        <!-- android:textColorPrimary adalah warna teks title yang ada di Toolbar  -->
+        <item name="android:textColorPrimary">#FFFFFF</item>
+        <item name="android:textColorSecondary">#FFFFFF</item>
+        <!-- actionMenuTextColor adalah warna teks action (menu item)  -->
+        <item name="actionMenuTextColor">#FFFFFF</item>
+        <!-- Memberi warna accent untuk input field seperti checkbox -->
+        <item name="colorAccent">#FFFFFF</item>
+        <item name="colorPrimary">#FFFFFF</item>
+        <item name="android:navigationBarColor">@color/common_google_signin_btn_text_dark_pressed
+        </item>
+        <!--&lt;!&ndash; memberi warna view saat normal. &ndash;&gt;-->
+        <!--<item name="colorControlNormal">@color/controlNormal</item>-->
+        <!--&lt;!&ndash; Memberi warna saat view aktif (sedang diberi tanda cek atau di switch) &ndash;&gt;-->
+        <!--<item name="colorControlActivated">@color/controlActivated</item>-->
+        <!--&lt;!&ndash; Memberi warna kontrol untuk efek ripples atau pemilihan list &ndash;&gt;-->
+        <!--<item name="colorControlHighlight">@color/controlActivated</item>-->
+    </style>
+
+</resources>

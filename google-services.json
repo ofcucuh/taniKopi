@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "91202107153",
+    "firebase_url": "https://pikopikopii.firebaseio.com",
+    "project_id": "pikopikopii",
+    "storage_bucket": "pikopikopii.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:91202107153:android:0db6e39f523e553b09beb0",
+        "android_client_info": {
+          "package_name": "com.selatan.tanikopi"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "91202107153-9l2caie88l5196b70p241sk7p4oo2mq7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDZWPtla1UCjOuIBF5QDAHTepVbsqSqzW4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "91202107153-9l2caie88l5196b70p241sk7p4oo2mq7.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
