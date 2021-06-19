@@ -8,13 +8,17 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
+import retrofit2.Retrofit;
+
 
 public class MainActivity extends AppCompatActivity {
     EditText pswd,user;
+    Retrofit retrofit;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        retrofit = CallService.getClient();
 
         pswd = findViewById(R.id.editPasswd);
         user = findViewById(R.id.editUser);
@@ -29,7 +33,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
     private void login(){
-        LoginCheck lc = new LoginCheck(user.getText().toString(),pswd.getText().toString(),this);
+        LoginCheck lc = new LoginCheck(user.getText().toString(),pswd.getText().toString(),this,retrofit);
         lc.login();
 //        Intent i=new Intent(this,MainMenu.class);
 //        startActivity(i);

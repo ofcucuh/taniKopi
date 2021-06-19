@@ -15,20 +15,23 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.androidnetworking.AndroidNetworking;
-import com.androidnetworking.common.Priority;
-import com.androidnetworking.error.ANError;
-import com.androidnetworking.interfaces.StringRequestListener;
-
 import java.util.ArrayList;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
 
 public class AdapterStok extends RecyclerView.Adapter<AdapterStok.AdapterStokViewHolder> {
 
     private ArrayList<IsiStok> dataList;
     private Context context;
+    private Retrofit retrofit;
+
     public AdapterStok(ArrayList<IsiStok> dataList,Context context){
         this.dataList = dataList;
         this.context = context;
+        retrofit = CallService.getClient();
     }
 
     @NonNull
@@ -80,31 +83,28 @@ public class AdapterStok extends RecyclerView.Adapter<AdapterStok.AdapterStokVie
         final ProgressDialog loading;
         loading = ProgressDialog.show(context, "Mengambil Data...", "Mohon Tunggu...", false, false);
 //        loading.setCanceledOnTouchOutside(true);
+        ApiService apiEndpointService = retrofit.create(ApiService.class);
+        Call<String> call = apiEndpointService.getJumlahStok();
+        call.enqueue(new Callback<String>() {
+            @Override
+            public void onResponse(Call<String> call, Response<String> response) {
+                if(response.body().isEmpty()){
+                    Toast.makeText(context,"Data Kosong",Toast.LENGTH_SHORT).show();
+                }else{
+                    new AlertDialog.Builder(context).setTitle("Jumlah Stok Gudang")
+                            .setMessage("Jumlah Stok Gudang = " + response.body())
+                            .setPositiveButton("Ya", null)
+                            .create().show();
+                }
+                loading.dismiss();
+            }
 
-        AndroidNetworking.post(Config.URL_GET_JUMLAH_STOK)
-                .setPriority(Priority.HIGH)
-                .build()
-                .getAsString(new StringRequestListener() {
-                    @Override
-                    public void onResponse(String s) {
-                        loading.dismiss();
-                        if (s.isEmpty()){
-                            Toast.makeText(context,"Data Kosong",Toast.LENGTH_SHORT).show();
-                        }
-                        else {
-                            new AlertDialog.Builder(context).setTitle("Jumlah Stok Gudang")
-                                    .setMessage("Jumlah Stok Gudang = " + s)
-                                    .setPositiveButton("Ya", null)
-                                    .create().show();
-                        }
-                    }
-
-                    @Override
-                    public void onError(ANError anError) {
-                        loading.dismiss();
-                        showDialog();
-                    }
-                });
+            @Override
+            public void onFailure(Call<String> call, Throwable t) {
+                Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
+                loading.dismiss();
+            }
+        });
     }
     @Override
     public int getItemCount() {

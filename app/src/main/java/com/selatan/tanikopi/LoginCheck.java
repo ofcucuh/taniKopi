@@ -5,51 +5,56 @@ import android.content.Context;
 import android.content.Intent;
 import android.widget.Toast;
 
-import com.androidnetworking.AndroidNetworking;
-import com.androidnetworking.common.Priority;
-import com.androidnetworking.error.ANError;
-import com.androidnetworking.interfaces.StringRequestListener;
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
 
+import com.selatan.tanikopi.ApiService;
+
+import java.io.IOException;
 
 public class LoginCheck {
     private String uname;
     private String paswd;
     private Context context;
+    private Retrofit retrofit;
 
-    public LoginCheck(String uname, String paswd, Context context) {
+    public LoginCheck(String uname, String paswd, Context context, Retrofit retrofit) {
         this.uname = uname;
         this.paswd = paswd;
         this.context = context;
+        this.retrofit = retrofit;
     }
 
     public void login(){
-        final ProgressDialog loading;
-        loading = ProgressDialog.show(context, "Login...", "Mohon Tunggu...", false, false);
-//        loading.setCanceledOnTouchOutside(true);
-        AndroidNetworking.post(Config.URL_LOGIN)
-                .addBodyParameter("username",uname)
-                .addBodyParameter("passwd", paswd)
-                .setPriority(Priority.MEDIUM)
-                .build()
-                .getAsString(new StringRequestListener() {
-                    @Override
-                    public void onResponse(String s) {
-                        loading.dismiss();
-                        if (s.equals("Username atau password salah !")) {
-                            Toast.makeText(context, s, Toast.LENGTH_LONG).show();
-                        } else {
-                            Toast.makeText(context, "Selamat Datang", Toast.LENGTH_LONG).show();
-                            Intent i = new Intent(context, MainMenu.class);
-                            Config.username = s;
-                            context.startActivity(i);
-                        }
+        ProgressDialog loading = ProgressDialog.show(context, "Login...", "Mohon Tunggu...", false, false);
+        ApiService apiEndpointService = retrofit.create(ApiService.class);
+        Call<ResponseBody> call = apiEndpointService.login(uname, paswd);
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                if (response.body()!=null) {
+                    Toast.makeText(context, "Selamat Datang", Toast.LENGTH_LONG).show();
+                    Intent intent = new Intent(context, MainMenu.class);
+                    try {
+                        Config.username = response.body().string();
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
+                    context.startActivity(intent);
+                }else{
+                    Toast.makeText(context, "Username atau Password anda salah!", Toast.LENGTH_SHORT).show();
+                }
+                loading.dismiss();
+            }
 
-                    @Override
-                    public void onError(ANError anError) {
-                        loading.dismiss();
-                        login();
-                    }
-                });
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Toast.makeText(context, t.getMessage(), Toast.LENGTH_SHORT).show();
+                loading.dismiss();
+            }
+        });
     }
 }

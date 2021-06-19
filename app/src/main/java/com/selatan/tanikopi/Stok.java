@@ -11,27 +11,34 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.widget.Toast;
 
-import com.androidnetworking.AndroidNetworking;
-import com.androidnetworking.common.Priority;
-import com.androidnetworking.error.ANError;
-import com.androidnetworking.interfaces.StringRequestListener;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.ArrayList;
+
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
 
 public class Stok extends AppCompatActivity {
 
     private ArrayList<IsiStok> isiStoks,stokFw,stokH,stokN;
     private TabLayout tabLayout;
     private ViewPager viewPager;
+    private Retrofit retrofit;
+    private ApiService apiEndpointService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_stok);
+        retrofit = CallService.getClient();
+        apiEndpointService = retrofit.create(ApiService.class);
 
         getIsiStok();
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -42,9 +49,6 @@ public class Stok extends AppCompatActivity {
             setSupportActionBar(toolbar);
         }
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
-
-
     }
 
 
@@ -109,6 +113,8 @@ public class Stok extends AppCompatActivity {
         stokN= new ArrayList<>();
         try {
             jsonObject = new JSONObject(s);
+            System.out.println(s);
+            System.out.println(jsonObject.toString());
             JSONArray result = jsonObject.getJSONArray("result");
             for(int i = 0; i<result.length(); i++){
                 JSONObject jo = result.getJSONObject(i);
@@ -118,7 +124,6 @@ public class Stok extends AppCompatActivity {
                 String jenis = jo.getString("jenis_proses");
                 IsiStok is = new IsiStok(kode_proses,jumlah,gabah,jenis);
                 isiStoks.add(is);
-//                System.out.println(is.toString());
             }
 
         } catch (JSONException e) {
@@ -135,39 +140,33 @@ public class Stok extends AppCompatActivity {
         }
         viewPager.setAdapter(new SectionPagerAdapter(getSupportFragmentManager()));
         tabLayout.setupWithViewPager(viewPager);
-//        System.out.println(stokFw.get(0).toString()+"hehe");
-//        System.out.println(stokH.get(0).toString()+"heha");
 
     }
     private void getIsiStok(){
         final ProgressDialog loading;
         loading = ProgressDialog.show(this, "Mengambil Data...", "Mohon Tunggu...", false, false);
 //        loading.setCanceledOnTouchOutside(true);
-        AndroidNetworking.post(Config.URL_GET_STOK)
-                .setPriority(Priority.IMMEDIATE)
-                .build()
-                .getAsString(new StringRequestListener() {
-                    @Override
-                    public void onResponse(String response) {
-                        loading.dismiss();
-                        addIsiStok(response);
-                    }
 
-                    @Override
-                    public void onError(ANError anError) {
-                        loading.dismiss();
-                        getIsiStok();
-                    }
-                });
-//        for (int i=0;i<isiStoks.size();i++){
-//            if(isiStoks.get(i).getJenis().equals("fw")||isiStoks.get(i).getJenis().equals("FW")||isiStoks.get(i).getJenis().equals("fW")||isiStoks.get(i).getJenis().equals("Fw")){
-//                stokFw.add(isiStoks.get(i));
-//            }else if(isiStoks.get(i).getJenis().equals("h")||isiStoks.get(i).getJenis().equals("H")){
-//                stokH.add(isiStoks.get(i));
-//            }else if(isiStoks.get(i).getJenis().equals("h")||isiStoks.get(i).getJenis().equals("N")){
-//                stokN.add(isiStoks.get(i));
-//            }
-//        }
+        Call<ResponseBody> call = apiEndpointService.getStok();
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+//                addIsiStok(response.body());
+                loading.dismiss();
+                try {
+                    addIsiStok(response.body().string());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Toast.makeText(Stok.this, t.getMessage(), Toast.LENGTH_SHORT).show();
+                loading.dismiss();
+            }
+        });
+
 //        System.out.println(stokFw.get(0).toString()+"hehe");
     }
 }

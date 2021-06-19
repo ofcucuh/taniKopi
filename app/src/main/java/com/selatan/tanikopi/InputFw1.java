@@ -1,6 +1,7 @@
 package com.selatan.tanikopi;
 
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.graphics.Typeface;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -10,15 +11,15 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.androidnetworking.AndroidNetworking;
-import com.androidnetworking.common.Priority;
-import com.androidnetworking.error.ANError;
-import com.androidnetworking.interfaces.StringRequestListener;
-
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
 
 //import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
@@ -27,11 +28,14 @@ public class InputFw1 extends AppCompatActivity {
     private TextView dateTime,jam,kodeProses;
     private EditText edNama,edJumlah,edTrx;
     private String judul,sDate;
-
+    private Retrofit retrofit;
+    private ApiService apiEndpointService;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_input_fw1);
+        retrofit = CallService.getClient();
+        apiEndpointService = retrofit.create(ApiService.class);
         kodeProses = findViewById(R.id.txkdProses);
         id();
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -77,20 +81,19 @@ public class InputFw1 extends AppCompatActivity {
             jenis = "fw";
             ProsesInput pi = new ProsesInput(kd_pro,jenis,kd_trx,
                     "1",dateS,edJumlah.getText().toString().trim(),
-                    jam.getText().toString().trim()+":00",edNama.getText().toString().trim(),this);
+                    jam.getText().toString().trim()+":00",edNama.getText().toString().trim(),this,retrofit);
             pi.addProses();
-//            System.out.println(pi.toString());
         }else if(judul.equals("Natural")){
             jenis = "n";
             ProsesInput pi = new ProsesInput(kd_pro,jenis,kd_trx,
                     "1",dateS,edJumlah.getText().toString().trim(),
-                    jam.getText().toString().trim()+":00",edNama.getText().toString().trim(),this);
+                    jam.getText().toString().trim()+":00",edNama.getText().toString().trim(),this,retrofit);
             pi.addProses();
         }else{
             jenis = "h";
             ProsesInput pi = new ProsesInput(kd_pro,jenis,kd_trx,
                     "1",dateS,edJumlah.getText().toString().trim(),
-                    jam.getText().toString().trim()+":00",edNama.getText().toString().trim(),this);
+                    jam.getText().toString().trim()+":00",edNama.getText().toString().trim(),this,retrofit);
             pi.addProses();
         }
 //        Intent i = new Intent(this, Stok.class);
@@ -100,41 +103,38 @@ public class InputFw1 extends AppCompatActivity {
         final ProgressDialog loading;
         loading = ProgressDialog.show(this, "Mengambil ID...", "Mohon Tunggu...", false, false);
 //        loading.setCanceledOnTouchOutside(true);
-
-        AndroidNetworking.post(Config.URL_GET_ID)
-                .setPriority(Priority.IMMEDIATE)
-                .build()
-                .getAsString(new StringRequestListener() {
-                    @Override
-                    public void onResponse(String s) {
-                        String ss;
-                        loading.dismiss();
-                        if (!s.equals("")) {
-                            ss = String.valueOf(Integer.parseInt(s) + 1);
-                            if (judul.equals("Fullwash")) {
-                                kodeProses.setText("FW/" + ss + "/" + sDate);
-                            } else if (judul.equals("Natural")) {
-                                kodeProses.setText("N/" + ss + "/" + sDate);
-                            } else {
-                                kodeProses.setText("H/" + ss + "/" + sDate);
-                            }
-                        } else {
-                            if (judul.equals("Fullwash")) {
-                                kodeProses.setText("FW/" + 0 + "/" + sDate);
-                            } else if (judul.equals("Natural")) {
-                                kodeProses.setText("N/" + 0 + "/" + sDate);
-                            } else {
-                                kodeProses.setText("H/" + 0 + "/" + sDate);
-                            }
-                        }
+        Call<String> call = apiEndpointService.getId();
+        call.enqueue(new Callback<String>() {
+            @Override
+            public void onResponse(Call<String> call, Response<String> response) {
+                String ss;
+                loading.dismiss();
+                if (response.body()!=null) {
+                    ss = String.valueOf(Integer.parseInt(response.body()) + 1);
+                    if (judul.equals("Fullwash")) {
+                        kodeProses.setText("FW/" + ss + "/" + sDate);
+                    } else if (judul.equals("Natural")) {
+                        kodeProses.setText("N/" + ss + "/" + sDate);
+                    } else {
+                        kodeProses.setText("H/" + ss + "/" + sDate);
                     }
-
-                    @Override
-                    public void onError(ANError anError) {
-                        loading.dismiss();
-                        id();
+                } else {
+                    if (judul.equals("Fullwash")) {
+                        kodeProses.setText("FW/" + 0 + "/" + sDate);
+                    } else if (judul.equals("Natural")) {
+                        kodeProses.setText("N/" + 0 + "/" + sDate);
+                    } else {
+                        kodeProses.setText("H/" + 0 + "/" + sDate);
                     }
-                });
+                }
+            }
+
+            @Override
+            public void onFailure(Call<String> call, Throwable t) {
+                loading.dismiss();
+                Toast.makeText(getApplicationContext(),t.getMessage(),Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
 }

@@ -16,12 +16,16 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
+import retrofit2.Retrofit;
+
 public class InputFw2 extends AppCompatActivity {
     private Date date;
     private TextView dateTime,jam,kodeProses,noProses;
     private EditText edNama,edJumlah;
     private String judul,sDate;
     private Button masuk,tambah;
+    private Retrofit retrofit;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -29,6 +33,7 @@ public class InputFw2 extends AppCompatActivity {
         setContentView(R.layout.activity_input_fw2);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        retrofit = CallService.getClient();
         dateTime = (TextView) findViewById(R.id.txDate2);
         jam = (TextView) findViewById(R.id.txJam2);
         Typeface customFont =Typeface.createFromAsset(getAssets(),"font/DS-DIGI.TTF");
@@ -75,7 +80,7 @@ public class InputFw2 extends AppCompatActivity {
         });
     }
     private void getProsesKe(){
-        ProsesInput pi = new ProsesInput(judul,this);
+        ProsesInput pi = new ProsesInput(judul,this,retrofit);
         pi.getProses_ke(noProses);
 
     }
@@ -84,7 +89,7 @@ public class InputFw2 extends AppCompatActivity {
         Calendar cal = Calendar.getInstance();
         String dateS = dateFormat.format(cal.getTime());
         final ProsesInput pi = new ProsesInput(dateS,kodeProses.getText().toString().trim(),noProses.getText().toString().substring(10),edJumlah.getText().toString().trim(),
-                jam.getText().toString().trim()+":00",edNama.getText().toString().trim(),this,"no");
+                jam.getText().toString().trim()+":00",edNama.getText().toString().trim(),this,"no",retrofit);
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Input Data dan Tambahkan Proses?");
         builder.setPositiveButton("Ya", new DialogInterface.OnClickListener() {
@@ -111,7 +116,7 @@ public class InputFw2 extends AppCompatActivity {
         Calendar cal = Calendar.getInstance();
         String dateS = dateFormat.format(cal.getTime());
         final ProsesInput pi = new ProsesInput(dateS,kodeProses.getText().toString().trim(),noProses.getText().toString().substring(10),edJumlah.getText().toString().trim(),
-                jam.getText().toString().trim()+":00",edNama.getText().toString().trim(),this,"yes");
+                jam.getText().toString().trim()+":00",edNama.getText().toString().trim(),this,"yes",retrofit);
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Input Data dan Akhiri Proses?");
         builder.setPositiveButton("Ya", new DialogInterface.OnClickListener() {

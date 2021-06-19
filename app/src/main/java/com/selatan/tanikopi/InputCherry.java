@@ -14,17 +14,21 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
+import retrofit2.Retrofit;
+
 public class InputCherry extends AppCompatActivity {
     private Spinner spVar;
     private Button btnInputCherry;
     private EditText edKd,edId,edJml,edHrg, edTing;
     private RadioButton rbArbc, rbRbst;
     private Date date;
+    private Retrofit retrofit;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_input_cherry);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        retrofit = CallService.getClient();
         TextView dateTime = (TextView) findViewById(R.id.txDate);
         edTing = (EditText) findViewById(R.id.edTinggi);
         edTing.setOnFocusChangeListener(new View.OnFocusChangeListener() {
@@ -91,11 +95,11 @@ public class InputCherry extends AppCompatActivity {
         Double jumlah = Double.valueOf(edJml.getText().toString().trim());
         Double ketinggian = Double.valueOf(edTing.getText().toString().trim());
         String varient = spVar.getSelectedItem().toString();
-        Cherry ch = new Cherry(this,kodetrx,id_petani,jenis,date,jumlah,ketinggian,harga,varient);
+        Cherry ch = new Cherry(this,kodetrx,id_petani,jenis,date,jumlah,ketinggian,harga,varient,retrofit);
         ch.addCherry();
     }
     private void getNama(String s, EditText edNama){
-        Cherry ea = new Cherry(s,this);
+        Cherry ea = new Cherry(s,this,retrofit);
         ea.setNamaPetani(edNama);
     }
 }
